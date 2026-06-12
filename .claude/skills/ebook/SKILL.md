@@ -9,6 +9,20 @@ Skill ini memandu pembuatan ebook dari nol sampai file `.docx`. Alur kerjanya:
 **gali ide → outline → tulis per bab → build .docx**. Tiap bab disimpan sebagai
 file Markdown, lalu di-compile jadi satu dokumen Word oleh tooling di repo ini.
 
+Ini skill **orkestrator**. Untuk tiap tahap ada skill khusus yang lebih fokus dan
+bisa dipanggil sendiri-sendiri (lewat `/<nama>`):
+
+| Tahap | Skill | Fungsi |
+|---|---|---|
+| 1 | `judul-buku` | Judul + subjudul persuasif format transformasi |
+| 2 | `deskripsi-buku` | Deskripsi/blurb yang menjual (`description.md`) |
+| 3 | `bab-buku` | Daftar bab (menanyakan **berapa bab**) → file `chapters/` |
+| 4 | `sub-bab` | Pecah tiap bab jadi sub-bab (heading `##`) |
+| 5 | `isi-sub-bab` | Tulis isi penuh tiap sub-bab |
+
+Saat menjalankan ebook end-to-end, ikuti urutan tahap di atas; rincian tiap tahap
+ada di skill masing-masing.
+
 Struktur tiap ebook ada di `books/<slug>/`:
 
 ```
