@@ -1,0 +1,8 @@
+node_modules/
+.npm-cache/
+dist/
+*.log
+.DS_Store
+
+# Hasil build ebook (file .docx). Hapus baris ini kalau mau commit hasilnya.
+books/**/dist/
