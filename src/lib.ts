@@ -24,6 +24,8 @@ export interface BookMeta {
    * Kalau dikosongkan, semua *.md di chapters/ dipakai urut menurut nama file.
    */
   chapters?: string[];
+  /** URL gambar cover ebook (opsional). Ditampilkan di halaman judul .docx. */
+  coverImage?: string;
 }
 
 export interface LoadedBook {

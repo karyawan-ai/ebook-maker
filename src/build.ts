@@ -15,9 +15,15 @@ function escapeHtml(s: string): string {
 }
 
 function titlePage(meta: LoadedBook['meta']): string {
-  const parts = [
-    `<h1 style="text-align:center;font-size:32pt;margin-top:180px;">${escapeHtml(meta.title)}</h1>`,
-  ];
+  const parts: string[] = [];
+  if (meta.coverImage) {
+    parts.push(
+      `<p style="text-align:center;margin-top:40px;"><img src="${meta.coverImage}" style="max-width:420px;max-height:520px;" /></p>`,
+    );
+  }
+  parts.push(
+    `<h1 style="text-align:center;font-size:32pt;margin-top:${meta.coverImage ? '30px' : '180px'};">${escapeHtml(meta.title)}</h1>`,
+  );
   if (meta.subtitle) {
     parts.push(
       `<p style="text-align:center;font-size:18pt;color:#555;">${escapeHtml(meta.subtitle)}</p>`,
@@ -25,7 +31,7 @@ function titlePage(meta: LoadedBook['meta']): string {
   }
   if (meta.author) {
     parts.push(
-      `<p style="text-align:center;font-size:14pt;margin-top:120px;">${escapeHtml(meta.author)}</p>`,
+      `<p style="text-align:center;font-size:14pt;margin-top:${meta.coverImage ? '40px' : '120px'};">${escapeHtml(meta.author)}</p>`,
     );
   }
   return parts.join('\n');

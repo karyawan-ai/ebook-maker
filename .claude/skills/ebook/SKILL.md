@@ -19,6 +19,7 @@ bisa dipanggil sendiri-sendiri (lewat `/<nama>`):
 | 3 | `bab-buku` | Daftar bab (menanyakan **berapa bab**) → file `chapters/` |
 | 4 | `sub-bab` | Pecah tiap bab jadi sub-bab (heading `##`) |
 | 5 | `isi-sub-bab` | Tulis isi penuh tiap sub-bab |
+| 6 | `karyawan_ai` (MCP) | Generate cover image + ilustrasi per bab (opsional) |
 
 Saat menjalankan ebook end-to-end, ikuti urutan tahap di atas; rincian tiap tahap
 ada di skill masing-masing.
@@ -46,13 +47,49 @@ pertanyaan sekaligus, jangan bertubi-tubi):
 - **Nada & gaya** — formal, santai, naratif, teknis, dsb.
 - **Bahasa** — Indonesia/Inggris/lainnya.
 - **Panjang** — perkiraan jumlah bab dan target kata per bab.
+- **Gambar** — tanyakan dua hal ini secara eksplisit:
+  1. *"Apakah ingin cover image dibuatkan otomatis berdasarkan judul dan tema buku?"*
+  2. *"Apakah ingin ilustrasi pembuka dibuatkan untuk tiap bab?"*
 
 ### 2. Buat outline
 Susun daftar bab dengan ringkasan tiap bab (1-2 kalimat) plus poin-poin kunci.
 **Tunjukkan outline ke user dan minta persetujuan/revisi sebelum menulis isi.**
 Jangan lanjut menulis bab sampai outline disetujui.
 
-### 3. Scaffold folder ebook
+### 3. Generate gambar (jika user minta)
+
+Gunakan MCP `karyawan_ai` — tool `karyawan_gen_run`. Jika user tidak tahu mau
+model apa, gunakan default **Imagen 4 Fast** (`google/imagen-4.0-fast-generate-001`).
+Tampilkan pilihan model berikut ke user jika mereka ingin pilih sendiri:
+
+| Model | Slug | Harga | Kapan pakai |
+|---|---|---|---|
+| Imagen 4 Fast | `google/imagen-4.0-fast-generate-001` | $0.048/gambar | Draft cepat, hemat |
+| Imagen 4 | `google/imagen-4.0-generate-001` | $0.096/gambar | Kualitas standar (default) |
+| Imagen 4 Ultra | `google/imagen-4.0-ultra-generate-001` | $0.144/gambar | Kualitas tertinggi |
+| Flux Pro 1.1 | `bfl/flux-pro-1.1` | $0.096/gambar | Detail artistik tinggi |
+| Recraft v4 | `recraft/recraft-v4` | $0.096/gambar | Gaya grafis/vektor bersih |
+
+**Cover ebook** (jika user setuju):
+1. Buat prompt deskriptif: sertakan tema buku, nuansa/mood, gaya visual (misal:
+   *"professional book cover, [tema], minimalist design, [warna dominan], high quality"*).
+2. Jalankan `karyawan_gen_run` dengan `aspectRatio: "3:4"`.
+3. Simpan URL hasil ke `book.json` → field `"coverImage": "<url>"`.
+   Cover otomatis muncul di halaman judul .docx saat build.
+
+**Ilustrasi per bab** (jika user setuju):
+1. Untuk tiap bab, buat prompt dari judul bab + 1-2 poin isi utamanya.
+2. Jalankan `karyawan_gen_run` dengan `aspectRatio: "16:9"`.
+3. Sisipkan di baris pertama file `.md` bab tersebut:
+   ```
+   ![Ilustrasi bab](URL_GAMBAR)
+   ```
+   Gambar otomatis masuk ke .docx saat build.
+
+> Catatan: "Gemini" tidak tersedia sebagai model image generation di karyawan_ai.
+> Model Google yang tersedia adalah Imagen 4 (kualitas setara, dari Google DeepMind).
+
+### 4. Scaffold folder ebook
 Buat strukturnya. Cara tercepat:
 
 ```bash
@@ -64,7 +101,7 @@ Lalu **edit `book.json`** (isi `subtitle`, `author`, `language`) dan tulis ulang
 `outline.md` sesuai hasil langkah 2. Boleh juga membuat file-file ini langsung
 tanpa script jika lebih praktis.
 
-### 4. Tulis bab demi bab
+### 5. Tulis bab demi bab
 Tulis tiap bab sebagai file Markdown di `chapters/`, diberi nomor urut:
 `01-pendahuluan.md`, `02-....md`, dst. Aturan:
 - Tiap file mulai dengan `# Judul Bab` (heading level 1) — ini jadi judul bab di .docx.
@@ -77,7 +114,7 @@ Tulis tiap bab sebagai file Markdown di `chapters/`, diberi nomor urut:
 Kalau memakai urutan eksplisit, daftarkan nama file di `book.json` → `chapters`.
 Kalau dikosongkan, urutan diambil otomatis dari nama file (numeric sort).
 
-### 5. Build ke .docx
+### 6. Build ke .docx
 
 ```bash
 npm run build -- <slug>
