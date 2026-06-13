@@ -58,36 +58,59 @@ Jangan lanjut menulis bab sampai outline disetujui.
 
 ### 3. Generate gambar (jika user minta)
 
-Gunakan MCP `karyawan_ai` — tool `karyawan_gen_run`. Jika user tidak tahu mau
-model apa, gunakan default **Imagen 4 Fast** (`google/imagen-4.0-fast-generate-001`).
+Gunakan MCP `karyawan_ai` — tool `karyawan_gen_run`. Default **Flux Pro 1.1 Ultra**
+(`bfl/flux-pro-1.1-ultra`) — kualitas terbaik untuk cover artistik dan ilustrasi.
+Jika Flux Pro 1.1 Ultra gagal, fallback ke **Imagen 4 Ultra** (`google/imagen-4.0-ultra-generate-001`).
+
 Tampilkan pilihan model berikut ke user jika mereka ingin pilih sendiri:
 
 | Model | Slug | Harga | Kapan pakai |
 |---|---|---|---|
-| Imagen 4 Fast | `google/imagen-4.0-fast-generate-001` | $0.048/gambar | Draft cepat, hemat |
-| Imagen 4 | `google/imagen-4.0-generate-001` | $0.096/gambar | Kualitas standar (default) |
-| Imagen 4 Ultra | `google/imagen-4.0-ultra-generate-001` | $0.144/gambar | Kualitas tertinggi |
-| Flux Pro 1.1 | `bfl/flux-pro-1.1` | $0.096/gambar | Detail artistik tinggi |
-| Recraft v4 | `recraft/recraft-v4` | $0.096/gambar | Gaya grafis/vektor bersih |
+| **Flux Pro 1.1 Ultra** *(default)* | `bfl/flux-pro-1.1-ultra` | $0.144/gambar | Kualitas tertinggi, detail artistik, warna kaya |
+| Flux Pro 1.1 | `bfl/flux-pro-1.1` | $0.096/gambar | Detail artistik tinggi, harga sedang |
+| Imagen 4 Ultra *(fallback)* | `google/imagen-4.0-ultra-generate-001` | $0.144/gambar | Kualitas tinggi dari Google |
+| Imagen 4 | `google/imagen-4.0-generate-001` | $0.096/gambar | Kualitas standar Google |
+| Recraft v4 Pro | `recraft/recraft-v4-pro` | $0.48/gambar | Gaya grafis/vektor premium |
+| Imagen 4 Fast | `google/imagen-4.0-fast-generate-001` | $0.048/gambar | Draft cepat, hemat biaya |
+
+> **Catatan model:** Gemini adalah LLM (bukan model gambar) dan tidak tersedia
+> untuk image generation di karyawan_ai. Model terbaik untuk gambar adalah
+> Flux Pro 1.1 Ultra dan Imagen 4 Ultra.
+
+**Panduan prompt agar gambar relevan dan berkualitas tinggi:**
+
+Prompt yang buruk menghasilkan gambar generik. Prompt yang baik menyebut:
+- **Subjek spesifik** dari konten bab (bukan kata umum seperti "bisnis" atau "sukses")
+- **Gaya visual** yang konsisten di seluruh buku (misal: *cinematic photography*, *flat illustration*, *watercolor*)
+- **Mood/atmosfer** (misal: *warm and inspiring*, *professional and clean*, *dramatic and bold*)
+- **Komposisi** (misal: *centered subject*, *rule of thirds*, *wide establishing shot*)
+- **Kualitas** selalu tutup dengan: `, highly detailed, professional quality, sharp focus`
+
+Contoh prompt buruk: *"gambar tentang produktivitas"*
+Contoh prompt bagus: *"A person in focused flow state working at a minimalist desk with morning light streaming through window, flat illustration style, warm golden tones, centered composition, highly detailed, professional quality, sharp focus"*
 
 **Cover ebook** (jika user setuju):
-1. Buat prompt deskriptif: sertakan tema buku, nuansa/mood, gaya visual (misal:
-   *"professional book cover, [tema], minimalist design, [warna dominan], high quality"*).
-2. Jalankan `karyawan_gen_run` dengan `aspectRatio: "3:4"`.
-3. Simpan URL hasil ke `book.json` → field `"coverImage": "<url>"`.
+1. Buat prompt berdasarkan: **judul buku + tema utama + target pembaca + mood**.
+   Template: *"[deskripsi visual metaforis tema buku], professional book cover style, [palet warna], [mood: inspiring/professional/dramatic], centered composition, highly detailed, professional quality, sharp focus"*
+2. Jalankan `karyawan_gen_run` dengan model `bfl/flux-pro-1.1-ultra` dan `aspectRatio: "3:4"`.
+3. Jika gagal, ulangi dengan `google/imagen-4.0-ultra-generate-001`.
+4. Simpan URL hasil ke `book.json` → field `"coverImage": "<url>"`.
    Cover otomatis muncul di halaman judul .docx saat build.
 
 **Ilustrasi per bab** (jika user setuju):
-1. Untuk tiap bab, buat prompt dari judul bab + 1-2 poin isi utamanya.
-2. Jalankan `karyawan_gen_run` dengan `aspectRatio: "16:9"`.
-3. Sisipkan di baris pertama file `.md` bab tersebut:
+1. Baca ringkasan bab dan poin utamanya dari `outline.md`.
+2. Buat prompt yang mencerminkan **isi spesifik bab**, bukan judul generiknya.
+   Template: *"[adegan/konsep konkret dari isi bab], [gaya visual konsisten dengan cover], [mood bab], wide cinematic composition, highly detailed, professional quality, sharp focus"*
+3. Jalankan `karyawan_gen_run` dengan model `bfl/flux-pro-1.1-ultra` dan `aspectRatio: "16:9"`.
+4. Jika gagal, ulangi dengan `google/imagen-4.0-ultra-generate-001`.
+5. Sisipkan di baris pertama file `.md` bab tersebut:
    ```
    ![Ilustrasi bab](URL_GAMBAR)
    ```
    Gambar otomatis masuk ke .docx saat build.
 
-> Catatan: "Gemini" tidak tersedia sebagai model image generation di karyawan_ai.
-> Model Google yang tersedia adalah Imagen 4 (kualitas setara, dari Google DeepMind).
+**Konsistensi visual:** Pertahankan gaya visual yang sama (model, gaya, palet warna)
+di seluruh gambar buku agar terlihat profesional dan kohesif.
 
 ### 4. Scaffold folder ebook
 Buat strukturnya. Cara tercepat:
